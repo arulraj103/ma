@@ -163,8 +163,34 @@ async function fetchAllIncomeRows() {
     fetchAllGuestBookings(),
   ]);
 
-  const error = subsResult.error || guestResult.error;
-  return { rows: [...subsResult.rows, ...guestResult.rows], error };
+  // Show the actual error in the browser console
+  if (subsResult.error) {
+    console.error(
+      'Subscription income error:',
+      subsResult.error.message
+    );
+  }
+
+  if (guestResult.error) {
+    console.error(
+      'Guest booking income error:',
+      guestResult.error.message
+    );
+  }
+
+  // Continue loading available data even if one table fails
+  const rows = [
+    ...(subsResult.rows || []),
+    ...(guestResult.rows || [])
+  ];
+
+  // Only fail completely if BOTH queries fail
+  const error =
+    subsResult.error && guestResult.error
+      ? subsResult.error
+      : null;
+
+  return { rows, error };
 }
 
 /**
